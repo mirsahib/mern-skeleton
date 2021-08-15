@@ -1,18 +1,17 @@
-## What?
-Refresh Tokens are credentials used to obtain access tokens. Refresh tokens are issued to the client by the authorization server and are used to obtain a new access token when the current access token becomes invalid or expires, or to obtain additional access tokens with identical or narrower scope
-
-## Why?
-In the current version of this project the jwt token has no expiration date which means if the token is stolen malacious user can access the system without requiring any user credential.
+## Summary
+In the current version of this repository we use jwt token for login with no expiration date.
 
 `server/controllers/auth.controllers.js`
 ```javascript
 const token = jwt.sign({
     _id: user._id
-}, config.jwtSecret)
+}, config.jwtSecret) // no expiration date
 ```
+This result to user get logged in for indefinete time unless the user itself logout of the system. It's advisable to use token expiration so that system can recheck user authenticity.
 
+## Fixes
+- Create a new field `refreshToken` in `user.model.js` (which store a hash jwt token with 7 days exiration limit)
+- Modified current jwt token with expiration time 5m in `server/controllers/auth.controllers.js`
+- For `/auth/signin` post request the frontend will receive refreshToken as response body and accessToken in response cookie.
+- Created a new api route [GET] `/auth/refresh` which will send a new accessToken when the current token get expired.
 
-## How?
-## Testing?
-## Screenshots (optional)
-## Anything Else?
