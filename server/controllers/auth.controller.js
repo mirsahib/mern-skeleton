@@ -19,16 +19,21 @@ const signin = async (req, res) => {
       })
     }
 
-    const token = jwt.sign({
+    const accessToken = jwt.sign({
       _id: user._id
-    }, config.jwtSecret)
+    }, config.jwtSecret,{expiresIn:"5m"}) //access token expire in 5m
 
-    res.cookie("t", token, {
-      expire: new Date() + 9999
+    // set refreshToken
+    const refreshToken = jwt.sign({
+      _id:user.id
+    },config.jwtSecret,{expiresIn:"7d"})// need to change the config jwtSecret to refresh token secret
+
+    res.cookie("t", accessToken, {
+      httpOnly:true
     })
 
     return res.json({
-      token,
+      refreshToken,
       user: {
         _id: user._id,
         name: user.name,
