@@ -28,6 +28,10 @@ const signin = async (req, res) => {
       _id:user.id
     },config.jwtSecret,{expiresIn:"7d"})// need to change the config jwtSecret to refresh token secret
 
+    //update user model refreshToken field
+
+    //
+
     res.cookie("t", accessToken, {
       httpOnly:true
     })
