@@ -2,6 +2,7 @@ import User from '../models/user.model'
 import jwt from 'jsonwebtoken'
 import expressJwt from 'express-jwt'
 import config from './../../config/config'
+import bcrypt from "bcryptjs";
 
 const signin = async (req, res) => {
   try {
@@ -21,15 +22,19 @@ const signin = async (req, res) => {
 
     const accessToken = jwt.sign({
       _id: user._id
-    }, config.jwtSecret,{expiresIn:"5m"}) //access token expire in 5m
+    }, config.jwtSecret, { expiresIn: "5m" }) //access token expire in 5m
 
     // set refreshToken
     const refreshToken = jwt.sign({
-      _id:user.id
-    },config.jwtSecret,{expiresIn:"7d"})// need to change the config jwtSecret to refresh token secret
+      _id: user.id
+    }, config.jwtSecret, { expiresIn: "7d" })// need to change the config jwtSecret to refresh token secret
 
     //update user model refreshToken field
-
+    const salt = await bcrypt.genSalt();
+    const hashRefreshToken = await bcrypt.hash(refreshToken, salt);
+    console.log('hash', hashRefreshToken)
+    user.refreshToken = hashRefreshToken
+    await user.save()
     //
 
     res.cookie("t", accessToken, {
@@ -46,7 +51,7 @@ const signin = async (req, res) => {
     })
 
   } catch (err) {
-
+    console.error(err)
     return res.status('401').json({
       error: "Could not sign in"
     })

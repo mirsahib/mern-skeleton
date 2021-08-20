@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: "Password is required"
   },
-  refreshToken:{type:String},
+  refreshToken:{type:String,default:""},
   salt: String,
   updated: Date,
   created: {
