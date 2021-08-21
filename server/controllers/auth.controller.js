@@ -81,9 +81,46 @@ const hasAuthorization = (req, res, next) => {
   next()
 }
 
+const getRefreshToken = async (req,res)=>{
+  try {
+    const id = jwt.decode(req.cookies.t)._id
+    // check if user id is valid from database
+    let user = await User.findById(id).exec()
+    if(!user){
+      return res.status('401').json({
+        error: "User not found"
+      })
+    }else{
+      //generate new access token
+      const accessToken = jwt.sign({
+        _id: user._id
+      }, config.jwtSecret, { expiresIn: "5m" }) //access token expire in 5m
+      //attach new access token with the cookie
+      res.cookie("t", accessToken, {
+        httpOnly:true
+      })
+      return res.json({
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email
+        }
+      })
+
+    }
+
+  } catch (error) {
+    console.error(error)
+    return res.status('500').json({
+      error: "Internal server error"
+    })
+  }
+}
+
 export default {
   signin,
   signout,
   requireSignin,
-  hasAuthorization
+  hasAuthorization,
+  getRefreshToken
 }
